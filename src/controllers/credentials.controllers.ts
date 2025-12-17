@@ -7,12 +7,12 @@ export class CredentialsController {
       await salesforceService.clearCredentials();
 
       return res.status(200).json({
-        message: "Credentials cleared successfully",
+        message: "Credentials cleared successfully"
       });
     } catch (error) {
       return res.status(500).json({
         message: "Failed to clear credentials",
-        error: String(error),
+        error: String(error)
       });
     }
   }
@@ -23,36 +23,41 @@ export class CredentialsController {
 
       if (!username || !password || !securityToken) {
         return res.status(400).json({
-          message: "username, password and securityToken are required",
+          message: "username, password and securityToken are required"
         });
       }
 
       await salesforceService.writeCredentials({
         username,
         password,
-        securityToken,
+        securityToken
       });
 
       return res.status(200).json({
-        message: "Credentials saved successfully",
+        message: "Credentials saved successfully"
       });
     } catch (error) {
       return res.status(500).json({
         message: "Failed to save credentials",
-        error: String(error),
+        error: String(error)
       });
     }
   }
 
   async getCredentials(req: Request, res: Response) {
     try {
-      const credentials = await salesforceService["readCredentials"]();
+      const credentials = await salesforceService.readCredentials();
+
+      if (!credentials || Object.keys(credentials).length === 0) {
+        return res.status(200).json({}); // return empty object if no credentials
+      }
 
       return res.status(200).json(credentials);
     } catch (error) {
+      console.error("Error reading credentials:", error);
       return res.status(500).json({
         message: "Failed to read credentials",
-        error: String(error),
+        error: String(error)
       });
     }
   }
