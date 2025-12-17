@@ -15,14 +15,12 @@ app.use(
 
 app.options("*", cors());
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/request/v1", routes);
 
-app.use("/api", routes);
-
-app.get("/api/ping", (_, res) => {
+app.get("/request/v1/ping", (_, res) => {
   res.status(200).json({
     status: "ok",
     message: "pong",
