@@ -56,8 +56,9 @@ export class CredentialsController {
     } catch (error) {
       console.error("Error reading credentials:", error);
       return res.status(500).json({
-        message: "Failed to read credentials",
-        error: String(error)
+        status: 500,
+        message: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
       });
     }
   }

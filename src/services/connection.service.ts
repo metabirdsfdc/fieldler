@@ -24,7 +24,7 @@ export class SalesforceService {
 
     await fs.writeFile(credentialsPath, json, {
       encoding: "utf-8",
-      flag: "w",
+      flag: "w"
     });
   }
 
@@ -68,7 +68,7 @@ export class SalesforceService {
     const { username, password, securityToken } = await this.readCredentials();
 
     const conn = new jsforce.Connection({
-      loginUrl: "https://login.salesforce.com",
+      loginUrl: "https://login.salesforce.com"
     });
 
     await conn.login(username, password + securityToken);

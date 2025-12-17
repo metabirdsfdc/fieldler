@@ -4,6 +4,8 @@ import routes from "./routes/index.js";
 
 const app = express();
 
+const url = "http://localhost:5173";
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -12,6 +14,10 @@ app.use(
       }
 
       if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      if (origin === url) {
         return callback(null, true);
       }
 
