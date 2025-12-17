@@ -11,9 +11,9 @@ app.use(
   })
 );
 app.use(express.json());
-app.use("/api", routes);
+app.use("/request", routes);
 
-app.get("/api/ping", (_, res) => {
+app.get("/request/ping", (_, res) => {
   res.status(200).json({
     status: "ok",
     message: "pong",
