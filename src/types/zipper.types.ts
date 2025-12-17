@@ -5,26 +5,20 @@ export class ZipBuilder {
   async buildDeployZip(rows: CsvRow[]): Promise<string> {
     const zip = new JSZip();
 
-    // 1️⃣ Remove header row
     const dataRows = rows.slice(1);
 
-    // 2️⃣ Group fields by SObject
     const grouped = this.groupByObject(dataRows);
 
-    // 3️⃣ Create CustomObject XML per SObject
     for (const [sobject, objectRows] of Object.entries(grouped)) {
       const objectXml = this.buildCustomObjectXml(objectRows);
       zip.file(`objects/${sobject}.object`, objectXml);
     }
 
-    // 4️⃣ package.xml (ONLY CustomObject)
     zip.file("package.xml", this.buildPackageXml(dataRows));
 
-    // 5️⃣ Return ZIP as base64
     return zip.generateAsync({ type: "base64" });
   }
 
-  /* ==================== HELPERS ==================== */
 
   private groupByObject(rows: CsvRow[]): Record<string, CsvRow[]> {
     return rows.reduce((acc, row) => {
@@ -36,7 +30,6 @@ export class ZipBuilder {
     }, {} as Record<string, CsvRow[]>);
   }
 
-  /* ==================== CUSTOM OBJECT ==================== */
 
   private buildCustomObjectXml(rows: CsvRow[]): string {
     const fieldsXml = rows.map((row) => this.buildFieldXml(row)).join("");
@@ -85,7 +78,6 @@ ${valuesXml}
     </valueSet>`;
   }
 
-  /* ==================== PACKAGE.XML ==================== */
 
   private buildPackageXml(rows: CsvRow[]): string {
     const objects = Array.from(new Set(rows.map((r) => r.sobject)));
