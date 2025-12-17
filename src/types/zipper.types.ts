@@ -19,7 +19,6 @@ export class ZipBuilder {
     return zip.generateAsync({ type: "base64" });
   }
 
-
   private groupByObject(rows: CsvRow[]): Record<string, CsvRow[]> {
     return rows.reduce((acc, row) => {
       if (!acc[row.sobject]) {
@@ -29,7 +28,6 @@ export class ZipBuilder {
       return acc;
     }, {} as Record<string, CsvRow[]>);
   }
-
 
   private buildCustomObjectXml(rows: CsvRow[]): string {
     const fieldsXml = rows.map((row) => this.buildFieldXml(row)).join("");
@@ -58,7 +56,7 @@ ${fieldsXml}
     }
 
     const valuesXml = row.values
-      .split("|")
+      .split(";")
       .map(
         (value) => `
         <value>
@@ -77,7 +75,6 @@ ${valuesXml}
       </valueSetDefinition>
     </valueSet>`;
   }
-
 
   private buildPackageXml(rows: CsvRow[]): string {
     const objects = Array.from(new Set(rows.map((r) => r.sobject)));
