@@ -10,9 +10,11 @@ app.use(
       if (!origin) {
         return callback(null, true);
       }
-      if (origin === "https://metafield-red.vercel.app/") {
+
+      if (origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
+
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
