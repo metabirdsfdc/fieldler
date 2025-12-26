@@ -1,10 +1,8 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = "mongodb://localhost:27017/metafie";
-
 export const connectDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI as string);
     console.log("MongoDB connected");
   } catch (err) {
     console.error("MongoDB connection error:", err);

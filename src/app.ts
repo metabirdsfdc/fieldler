@@ -31,6 +31,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
+
 dotenv.config();
 
 app.use(express.json());
