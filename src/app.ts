@@ -1,5 +1,8 @@
 import cors from "cors";
+import dotenv from "dotenv";
 import express from "express";
+import { connectDB } from "./config/db.js";
+import authRoutes from "./routes/auth.routes.js";
 import routes from "./routes/index.js";
 
 const app = express();
@@ -23,15 +26,18 @@ app.use(
 
       return callback(new Error("Not allowed by CORS"));
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
+dotenv.config();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+connectDB();
 
 app.use("/request/v1", routes);
+app.use("/api/auth", authRoutes);
 
 app.get("/request/v1/ping", (_, res) => {
   res.status(200).json({

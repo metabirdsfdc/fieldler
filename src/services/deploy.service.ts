@@ -5,18 +5,17 @@ import { errors } from "./errors.service.js";
 import { parse } from "./parse.service.js";
 
 class Deploy {
-  async deploy(csv: string) {
-    console.log("CSV", csv);
+  async deploy(userEmail: string, csv: string) {
+    const conn = await salesforceService.login(userEmail);
+
     const rows = parse.parseCsv(csv);
 
     const zipBase64 = await zipper.buildDeployZip(rows);
 
-    const conn = await salesforceService.login();
-
     const check = await conn.metadata.deploy(zipBase64, {
       checkOnly: true,
       singlePackage: true,
-      rollbackOnError: true,
+      rollbackOnError: true
     });
 
     let result: DeployResult;
@@ -33,7 +32,7 @@ class Deploy {
     const deploy = await conn.metadata.deploy(zipBase64, {
       checkOnly: false,
       singlePackage: true,
-      rollbackOnError: true,
+      rollbackOnError: true
     });
 
     do {

@@ -1,78 +1,83 @@
-import fs from "fs/promises";
 import jsforce from "jsforce";
-import path from "path";
-import { fileURLToPath } from "url";
+import { SalesforceCredential } from "../models/SalesforceCredential.js";
 
-type SalesforceCredentials = {
+type SalesforceCredentialsInput = {
   username: string;
   password: string;
   securityToken: string;
+  orgName?: string;
 };
 
 export class SalesforceService {
-  private getCredentialsPath(): string {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-
-    return path.resolve(__dirname, "../../credentials.json");
-  }
-
-  async writeCredentials(credentials: SalesforceCredentials): Promise<void> {
-    const credentialsPath = this.getCredentialsPath();
-
-    const json = JSON.stringify(credentials, null, 2);
-
-    await fs.writeFile(credentialsPath, json, {
-      encoding: "utf-8",
-      flag: "w"
+  async saveCredentials(
+    userEmail: string,
+    credentials: SalesforceCredentialsInput
+  ) {
+    const newCred = new SalesforceCredential({
+      userEmail,
+      ...credentials,
+      active: false
     });
+    return newCred.save();
   }
 
-  async clearCredentials(): Promise<void> {
-    const credentialsPath = this.getCredentialsPath();
-
-    try {
-      await fs.unlink(credentialsPath);
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
-        return;
+  async getCredentials(userEmail: string) {
+    return SalesforceCredential.find(
+      { userEmail },
+      {
+        id: 1,
+        username: 1,
+        orgName: 1,
+        active: 1
       }
-
-      throw new Error(
-        "Failed to clear Salesforce credentials: " + error.message
-      );
-    }
+    ).sort({ createdAt: -1 });
   }
 
-  async readCredentials(): Promise<SalesforceCredentials> {
-    const credentialsPath = this.getCredentialsPath();
-
-    try {
-      const file = await fs.readFile(credentialsPath, "utf-8");
-
-      return JSON.parse(file) as SalesforceCredentials;
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
-        throw new Error(
-          "Salesforce credentials not found. Please save credentials first."
-        );
-      }
-
-      throw new Error(
-        "Failed to read Salesforce credentials: " + error.message
-      );
-    }
+  async deleteCredential(credentialId: string, userEmail: string) {
+    await SalesforceCredential.deleteOne({ _id: credentialId, userEmail });
   }
 
-  async login(): Promise<jsforce.Connection> {
-    const { username, password, securityToken } = await this.readCredentials();
+  async clearCredentials(userEmail: string) {
+    await SalesforceCredential.deleteMany({ userEmail });
+  }
+
+  async activateCredential(credentialId: string, userEmail: string) {
+    await SalesforceCredential.updateMany(
+      { userEmail },
+      { $set: { active: false } }
+    );
+
+    await SalesforceCredential.updateOne(
+      { _id: credentialId, userEmail },
+      { $set: { active: true } }
+    );
+  }
+
+  async updateCredential(
+    credentialId: string,
+    userEmail: string,
+    data: Partial<SalesforceCredentialsInput>
+  ) {
+    return SalesforceCredential.findOneAndUpdate(
+      { _id: credentialId, userEmail },
+      { $set: data },
+      { new: true }
+    );
+  }
+
+  async login(userEmail: string) {
+    const cred = await SalesforceCredential.findOne({
+      userEmail,
+      active: true
+    });
+
+    if (!cred) throw new Error("Salesforce credentials not found");
 
     const conn = new jsforce.Connection({
       loginUrl: "https://login.salesforce.com"
     });
 
-    await conn.login(username, password + securityToken);
-
+    await conn.login(cred.username, cred.password + cred.securityToken);
     return conn;
   }
 }
