@@ -8,6 +8,7 @@ import routes from "./routes/index.js";
 const app = express();
 
 const url = "http://localhost:5173";
+const frontendUrl = "https://metafie.vercel.app";
 
 app.use(
   cors({
@@ -16,7 +17,7 @@ app.use(
         return callback(null, true);
       }
 
-      if (origin.endsWith(".vercel.app")) {
+      if (origin === frontendUrl) {
         return callback(null, true);
       }
 
