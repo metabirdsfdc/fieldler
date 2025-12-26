@@ -8,7 +8,6 @@ import routes from "./routes/index.js";
 const app = express();
 
 const url = "http://localhost:5173";
-const frontendUrl = "https://metafie.vercel.app";
 
 app.use(
   cors({
@@ -17,7 +16,7 @@ app.use(
         return callback(null, true);
       }
 
-      if (origin === frontendUrl) {
+      if (origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
 
@@ -31,7 +30,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
-
 dotenv.config();
 
 app.use(express.json());
